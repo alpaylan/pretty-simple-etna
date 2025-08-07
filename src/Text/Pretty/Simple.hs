@@ -615,7 +615,7 @@ layoutStringAnsi opts = fmap convertStyle . layoutString opts
 --
 -- __Newline Rules__
 --
--- >>> data Foo = A | B Foo | C [Foo] [Foo] deriving Show
+-- >>> data Foo = A | B Foo | C [Foo] [Foo] | D String | E [Foo] [Foo] [Foo] [Foo] [Foo] deriving Show
 --
 -- >>> pPrint $ B ( B A )
 -- B ( B A )
@@ -641,6 +641,17 @@ layoutStringAnsi opts = fmap convertStyle . layoutString opts
 --             ( B ( B A ) )
 --         ]
 --     )
+--
+-- >>> pPrint [C [B A] [D "1"]]
+-- [ C [ B A ]
+--     [ D "1" ]
+-- ]
+--
+-- >>> pPrint [E [B A] [D "1"] [B A] [B A] [D "2"]]
+-- [ E [ B A ]
+--     [ D "1" ] [ B A ] [ B A ]
+--     [ D "2" ]
+-- ]
 --
 -- __Laziness__
 --
@@ -728,6 +739,17 @@ layoutStringAnsi opts = fmap convertStyle . layoutString opts
 --
 -- >>> pPrintString "0x1b"
 -- 0x1b
+--
+-- >>> pPrintString "[div_ [class_ \"level\"] [button_ [onClick False] [text \"-\"], div_ [] [text $ ms level], button_ [onClick True] [text \"+\"]]]"
+-- [ div_
+--     [ class_ "level" ]
+--     [ button_ [ onClick False ]
+--         [ text "-" ]
+--     , div_ [] [ text $ ms level ]
+--     , button_ [ onClick True ]
+--         [ text "+" ]
+--     ]
+-- ]
 --
 -- __Other__
 --
