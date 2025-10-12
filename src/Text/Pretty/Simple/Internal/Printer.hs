@@ -32,7 +32,7 @@ import Data.Monoid ((<>))
 import Control.Monad.IO.Class (MonadIO, liftIO)
 import Control.Monad (join)
 import Control.Monad.State (MonadState, evalState, modify, gets)
-import Data.Char (isPrint, ord)
+import Data.Char (isPrint, isSpace, ord,)
 import Data.List.NonEmpty (NonEmpty, nonEmpty)
 import Data.Maybe (fromMaybe)
 import Prettyprinter
@@ -269,7 +269,7 @@ isSimple = \case
   _ -> True
   where
     isListSimple = \case
-      [[e]] -> isSimple e
+      [[e]] -> isSimple e && case e of Other s -> not $ any isSpace s ; _ -> True
       _:_ -> False
       [] -> True
 

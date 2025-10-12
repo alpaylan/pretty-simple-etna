@@ -615,19 +615,24 @@ layoutStringAnsi opts = fmap convertStyle . layoutString opts
 --
 -- __Newline Rules__
 --
--- >>> data Foo = A | B Foo | C [Foo] [Foo] deriving Show
+-- >>> data Foo = A | B Foo | C [Foo] [Foo] | D String | E [Foo] [Foo] [Foo] [Foo] [Foo] deriving Show
 --
 -- >>> pPrint $ B ( B A )
--- B ( B A )
+-- B
+--     ( B A )
 --
 -- >>> pPrint $ B ( B ( B A ) )
 -- B
---     ( B ( B A ) )
+--     ( B
+--         ( B A )
+--     )
 --
 -- >>> pPrint $ B ( B ( B ( B A ) ) )
 -- B
 --     ( B
---         ( B ( B A ) )
+--         ( B
+--             ( B A )
+--         )
 --     )
 --
 -- >>> pPrint $ B ( C [A, A] [B A, B (B (B A))] )
@@ -638,9 +643,26 @@ layoutStringAnsi opts = fmap convertStyle . layoutString opts
 --         ]
 --         [ B A
 --         , B
---             ( B ( B A ) )
+--             ( B
+--                 ( B A )
+--             )
 --         ]
 --     )
+--
+-- >>> pPrint [C [B A] [D "1"]]
+-- [ C
+--     [ B A ]
+--     [ D "1" ]
+-- ]
+--
+-- >>> pPrint [E [B A] [D "1"] [B A] [B A] [D "2"]]
+-- [ E
+--     [ B A ]
+--     [ D "1" ]
+--     [ B A ]
+--     [ B A ]
+--     [ D "2" ]
+-- ]
 --
 -- __Laziness__
 --
@@ -665,6 +687,10 @@ layoutStringAnsi opts = fmap convertStyle . layoutString opts
 --
 -- __Compactness options__
 --
+-- >>> pPrintOpt CheckColorTty defaultOutputOptionsDarkBg {outputOptionsCompact = True} $ B ( B ( B ( B A ) ) )
+-- B
+--     ( B ( B ( B A ) ) )
+--
 -- >>> pPrintStringOpt CheckColorTty defaultOutputOptionsDarkBg {outputOptionsCompact = True} "AST [] [Def ((3,1),(5,30)) (Id \"fact'\" \"fact'\") [] (Forall ((3,9),(3,26)) [((Id \"n\" \"n_0\"),KPromote (TyCon (Id \"Nat\" \"Nat\")))])]"
 -- AST []
 --     [ Def
@@ -683,7 +709,8 @@ layoutStringAnsi opts = fmap convertStyle . layoutString opts
 --         , A ]
 --         [ B A
 --         , B
---             ( B ( B A ) ) ] )
+--             ( B
+--                 ( B A ) ) ] )
 --
 -- >>> pPrintOpt CheckColorTty defaultOutputOptionsDarkBg {outputOptionsCompact = True} $ [("id", 123), ("state", 1), ("pass", 1), ("tested", 100), ("time", 12345)]
 -- [
@@ -699,7 +726,9 @@ layoutStringAnsi opts = fmap convertStyle . layoutString opts
 -- >>> pPrintOpt CheckColorTty defaultOutputOptionsDarkBg {outputOptionsInitialIndent = 3} $ B ( B ( B ( B A ) ) )
 --    B
 --        ( B
---            ( B ( B A ) )
+--            ( B
+--                ( B A )
+--            )
 --        )
 --
 -- __Weird/illegal show instances__
@@ -724,6 +753,20 @@ layoutStringAnsi opts = fmap convertStyle . layoutString opts
 --
 -- >>> pPrintString "0x1b"
 -- 0x1b
+--
+-- >>> pPrintString "[div_ [class_ \"level\"] [button_ [onClick False] [text \"-\"], div_ [] [text $ ms level], button_ [onClick True] [text \"+\"]]]"
+-- [ div_
+--     [ class_ "level" ]
+--     [ button_
+--         [ onClick False ]
+--         [ text "-" ]
+--     , div_ []
+--         [ text $ ms level ]
+--     , button_
+--         [ onClick True ]
+--         [ text "+" ]
+--     ]
+-- ]
 --
 -- __Other__
 --
