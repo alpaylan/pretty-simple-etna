@@ -18,3 +18,11 @@ cabal.sandbox.config
 .stack-work/
 web/result
 cabal.project.local
+
+# etna-ify additions
+/etna.log
+/progress.jsonl
+/.hegel/
+/.marauders/
+/dist-newstyle/
+/etna/dist-newstyle/

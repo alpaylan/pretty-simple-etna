@@ -1,0 +1,68 @@
+name = "pretty-simple"
+description = "Pretty-printer for Haskell value strings (cdepillabout/pretty-simple). Bug fixes mined from upstream history; modern HEAD is the base, each patch reverse-applies a fix to install the original bug."
+language = "haskell"
+strategies = ["quickcheck", "hedgehog", "falsify", "smallcheck"]
+crate = "pretty-simple"
+base_commit = "acd510beb27d5b119608cb3af6fff1eff5d4462f"
+
+# ---------------------------------------------------------------------------
+# Variant: parse_other_greedy_3adbc187_1
+# ---------------------------------------------------------------------------
+[[tasks]]
+mutations = ["parse_other_greedy_3adbc187_1"]
+
+[tasks.source]
+repo = "https://github.com/cdepillabout/pretty-simple"
+commits = ["3adbc1874ca3a94729bc409bf4be62c8e8f5c173"]
+commit_subjects = ["fix issue with 'greediness' in parsing integers"]
+origin = "internal"
+summary = "parseOther used to be `span (\\c -> notElem c \"{[()]}\\\"\\\",\" && not (isDigit c))`, which stopped at the first digit. For input `foo1` it produced `[Other \"foo\", NumberLit \"1\"]` instead of `[Other \"foo1\"]`. The fix tracks identifier context, so digits inside Haskell-style identifiers are absorbed into the surrounding `Other` token."
+
+[tasks.injection]
+kind = "patch"
+files = ["src/Text/Pretty/Simple/Internal/ExprParser.hs"]
+locations = [{ file = "src/Text/Pretty/Simple/Internal/ExprParser.hs", line = 159, symbol = "parseOther" }]
+patch = "patches/parse_other_greedy_3adbc187_1.patch"
+
+[tasks.bug]
+short_name = "parseOther_greedy_on_idents"
+invariant = "expressionParse on a Haskell-style identifier followed by digits (e.g. `foo1`, `bar123`) returns exactly one Other token whose payload is the full input. No NumberLit may appear in the result."
+how_triggered = "Reverse-applying the patch swaps the new identifier-tracking parseOther for the simple `span` definition. Calling expressionParse \"foo1\" then returns [Other \"foo\", NumberLit \"1\"] instead of [Other \"foo1\"]."
+
+[[tasks.tasks]]
+property = "IdentifierNotSplit"
+witnesses = [
+  { test_fn = "witness_identifier_not_split_case_foo1",   note = "expressionParse \"foo1\" must equal [Other \"foo1\"]" },
+  { test_fn = "witness_identifier_not_split_case_bar123", note = "expressionParse \"bar123\" must equal [Other \"bar123\"]" },
+]
+
+# ---------------------------------------------------------------------------
+# Variant: parse_other_apostrophe_7639db45_1
+# ---------------------------------------------------------------------------
+[[tasks]]
+mutations = ["parse_other_apostrophe_7639db45_1"]
+
+[tasks.source]
+repo = "https://github.com/cdepillabout/pretty-simple"
+commits = ["7639db45ac76b1fdc9bd8d4a591c8699be89b4e8"]
+commit_subjects = ["Fix parsing for identifiers containing \"'\""]
+origin = "internal"
+summary = "parseOther used to treat `'` as a terminator (in `\"{[()]}\\\"'\\\",\"`) and didn't track apostrophes inside identifiers. For input `Node'` it produced `[Other \"Node\", CharLit \"\"]` instead of `[Other \"Node'\"]`. The fix removes `'` from the terminator set and adds `ignoreInIdent` so apostrophes are absorbed into the surrounding identifier."
+
+[tasks.injection]
+kind = "patch"
+files = ["src/Text/Pretty/Simple/Internal/ExprParser.hs"]
+locations = [{ file = "src/Text/Pretty/Simple/Internal/ExprParser.hs", line = 169, symbol = "parseOther" }]
+patch = "patches/parse_other_apostrophe_7639db45_1.patch"
+
+[tasks.bug]
+short_name = "parseOther_splits_at_apostrophe"
+invariant = "expressionParse on a Haskell-style identifier followed by one-or-more apostrophes (e.g. `foo'`, `Node''`) returns exactly one Other token whose payload is the full input. No CharLit may appear in the result."
+how_triggered = "Reverse-applying the patch puts `'` back in the terminator set and removes the `ignoreInIdent` helper. Calling expressionParse \"Node'\" then returns [Other \"Node\", CharLit \"\"] instead of [Other \"Node'\"]."
+
+[[tasks.tasks]]
+property = "ApostropheInIdentifier"
+witnesses = [
+  { test_fn = "witness_apostrophe_in_identifier_case_foo_prime",  note = "expressionParse \"foo'\" must equal [Other \"foo'\"]" },
+  { test_fn = "witness_apostrophe_in_identifier_case_node_double", note = "expressionParse \"Node''\" must equal [Other \"Node''\"]" },
+]
