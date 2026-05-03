@@ -1,34 +1,34 @@
-diff --git b/src/Text/Pretty/Simple/Internal/ExprParser.hs a/src/Text/Pretty/Simple/Internal/ExprParser.hs
-index 1d5979e..984b00a 100644
---- b/src/Text/Pretty/Simple/Internal/ExprParser.hs
-+++ a/src/Text/Pretty/Simple/Internal/ExprParser.hs
-@@ -157,4 +157,28 @@ parseNumberLit firstDigit rest1 =
+diff --git a/src/Text/Pretty/Simple/Internal/ExprParser.hs b/src/Text/Pretty/Simple/Internal/ExprParser.hs
+index 984b00a..1d5979e 100644
+--- a/src/Text/Pretty/Simple/Internal/ExprParser.hs
++++ b/src/Text/Pretty/Simple/Internal/ExprParser.hs
+@@ -157,28 +157,4 @@ parseNumberLit firstDigit rest1 =
  -- >>> parseOther "I'm 2"
  -- ("I'm ","2")
  parseOther :: String -> (String, String)
--parseOther = span $ \c -> notElem c ("{[()]}\"," :: String) && not (isDigit c)
-+parseOther = go False
-+  where
-+    go
-+      :: Bool
-+      -- ^ in an identifier?
-+      -> String
-+      -> (String, String)
-+    go _ [] = ("", "")
-+    go insideIdent cs@(c:cs')
-+      | c `elem` ("{[()]}\"," :: String) = ("", cs)
-+      | ignoreInIdent c && not insideIdent = ("", cs)
-+      | insideIdent = first (c :) (go (isIdentRest c) cs')
-+      | otherwise = first (c :) (go (isIdentBegin c) cs')
-+
-+    isIdentBegin :: Char -> Bool
-+    isIdentBegin '_' = True
-+    isIdentBegin c = isAlpha c
-+
-+    isIdentRest :: Char -> Bool
-+    isIdentRest '_' = True
-+    isIdentRest '\'' = True
-+    isIdentRest c = isAlpha c || ignoreInIdent c
-+
-+    ignoreInIdent :: Char -> Bool
-+    ignoreInIdent x = isDigit x || x == '\''
+-parseOther = go False
+-  where
+-    go
+-      :: Bool
+-      -- ^ in an identifier?
+-      -> String
+-      -> (String, String)
+-    go _ [] = ("", "")
+-    go insideIdent cs@(c:cs')
+-      | c `elem` ("{[()]}\"," :: String) = ("", cs)
+-      | ignoreInIdent c && not insideIdent = ("", cs)
+-      | insideIdent = first (c :) (go (isIdentRest c) cs')
+-      | otherwise = first (c :) (go (isIdentBegin c) cs')
+-
+-    isIdentBegin :: Char -> Bool
+-    isIdentBegin '_' = True
+-    isIdentBegin c = isAlpha c
+-
+-    isIdentRest :: Char -> Bool
+-    isIdentRest '_' = True
+-    isIdentRest '\'' = True
+-    isIdentRest c = isAlpha c || ignoreInIdent c
+-
+-    ignoreInIdent :: Char -> Bool
+-    ignoreInIdent x = isDigit x || x == '\''
++parseOther = span $ \c -> notElem c ("{[()]}\"," :: String) && not (isDigit c)

@@ -1,24 +1,24 @@
-diff --git b/src/Text/Pretty/Simple/Internal/ExprParser.hs a/src/Text/Pretty/Simple/Internal/ExprParser.hs
-index cdfd61e..984b00a 100644
---- b/src/Text/Pretty/Simple/Internal/ExprParser.hs
-+++ a/src/Text/Pretty/Simple/Internal/ExprParser.hs
+diff --git a/src/Text/Pretty/Simple/Internal/ExprParser.hs b/src/Text/Pretty/Simple/Internal/ExprParser.hs
+index 984b00a..cdfd61e 100644
+--- a/src/Text/Pretty/Simple/Internal/ExprParser.hs
++++ b/src/Text/Pretty/Simple/Internal/ExprParser.hs
 @@ -166,8 +166,8 @@ parseOther = go False
        -> (String, String)
      go _ [] = ("", "")
      go insideIdent cs@(c:cs')
--      | c `elem` ("{[()]}\"'," :: String) = ("", cs)
--      | isDigit c && not insideIdent = ("", cs)
-+      | c `elem` ("{[()]}\"," :: String) = ("", cs)
-+      | ignoreInIdent c && not insideIdent = ("", cs)
+-      | c `elem` ("{[()]}\"," :: String) = ("", cs)
+-      | ignoreInIdent c && not insideIdent = ("", cs)
++      | c `elem` ("{[()]}\"'," :: String) = ("", cs)
++      | isDigit c && not insideIdent = ("", cs)
        | insideIdent = first (c :) (go (isIdentRest c) cs')
        | otherwise = first (c :) (go (isIdentBegin c) cs')
  
-@@ -178,4 +178,7 @@ parseOther = go False
+@@ -178,7 +178,4 @@ parseOther = go False
      isIdentRest :: Char -> Bool
      isIdentRest '_' = True
      isIdentRest '\'' = True
--    isIdentRest c = isAlpha c || isDigit c
-+    isIdentRest c = isAlpha c || ignoreInIdent c
-+
-+    ignoreInIdent :: Char -> Bool
-+    ignoreInIdent x = isDigit x || x == '\''
+-    isIdentRest c = isAlpha c || ignoreInIdent c
+-
+-    ignoreInIdent :: Char -> Bool
+-    ignoreInIdent x = isDigit x || x == '\''
++    isIdentRest c = isAlpha c || isDigit c
